@@ -9,8 +9,6 @@ const app = express();
 // Enhanced CORS middleware for Vercel deployment
 app.use((req, res, next) => {
   const allowedOrigins = [
-    'https://dzignhub-frontend-1fo8.vercel.app',
-    'https://dzignhub.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001',
     'https://localhost:3000',
@@ -57,6 +55,8 @@ app.use(async (req, res, next) => {
   }
 });
 
+app.use('/api/v1/auth', require('./routes/auth'));
+app.use('/api/v1/groups', require('./routes/groups'));
 
 
 app.get('/', (req, res) => {
