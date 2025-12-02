@@ -25,6 +25,16 @@ const joinGroup = asyncWrapper(async (req, res) => {
                 message: "Group not found."
             })
         }
+        let existingRequest = await GroupRequest.findOne({
+            group: req.body.groupId,
+            user: verification.userId
+        });
+        if (existingRequest) {
+            return res.status(400).json({
+                type: "error",
+                message: "You have already sent a request to join this group."
+            });
+        }
         let newRequest;
         if (group.visibility == "Public") {
             newRequest = new GroupRequest({
