@@ -7,7 +7,7 @@ const connectDB = require("../../db/connect");
 // Helper function to parse user agent
 
 
-const getGroupData = asyncWrapper(async (req, res) => {
+const getSingleGroup = asyncWrapper(async (req, res) => {
 
 
 
@@ -23,11 +23,11 @@ const getGroupData = asyncWrapper(async (req, res) => {
             const verification = jwt.verify(token, process.env.JWT_SECRET_KEY);
             
             
-     let posts = await GroupPost.find({groupId: req.body.groupId}).populate("author")
+     let post = await GroupPost.findOne({_id: req.body.postId}).populate("author")
 
      return res.status(200).json({ 
             type: "success", 
-            posts: posts
+            post: post
         });
     }
     catch(error) {
@@ -40,4 +40,4 @@ return res.status(400).json({
 
 });
 
-module.exports = getGroupData;
+module.exports = getSingleGroup;
