@@ -499,6 +499,7 @@ app.use('/api/v1/groups', require('./routes/groups'));
 app.use('/api/v1/messages', require('./routes/messages'));
 app.use('/api/v1/founders', require('./routes/founders'));
 app.use('/api/v1/chatbot', require('./routes/chatbot'));
+app.use('/api/v1/posts', require('./routes/posts'));
 
 app.get('/', (req, res) => {
   console.log("Hello world");
