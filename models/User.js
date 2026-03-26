@@ -44,7 +44,16 @@ const users = new Schema({
   },
   resetSessionExpires: {
     type: Date,
-  }
+  },
+
+   isProfileComplete: {
+    type: Boolean,
+    default: false
+  },
+
+  embedding: {
+    type: [Number]
+  },
 }, { timestamps: true });
 
 

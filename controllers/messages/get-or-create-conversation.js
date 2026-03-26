@@ -19,7 +19,7 @@ const getOrCreateConversation = asyncWrapper(async (req, res) => {
     // Find existing conversation
     let conversation = await Conversation.findOne({
       participants: { $all: [verification.userId, receiverId] }
-    }).populate('participants', 'fullName username');
+    }).populate('participants', 'fullName username userType');
 
     // Create new conversation if doesn't exist
     if (!conversation) {
@@ -27,7 +27,7 @@ const getOrCreateConversation = asyncWrapper(async (req, res) => {
         participants: [verification.userId, receiverId]
       });
       
-      await conversation.populate('participants', 'fullName username');
+      await conversation.populate('participants', 'fullName username userType');
     }
 
     return res.status(200).json({

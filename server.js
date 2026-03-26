@@ -500,6 +500,8 @@ app.use('/api/v1/messages', require('./routes/messages'));
 app.use('/api/v1/founders', require('./routes/founders'));
 app.use('/api/v1/chatbot', require('./routes/chatbot'));
 app.use('/api/v1/posts', require('./routes/posts'));
+app.use('/api/v1/dashboard', require('./routes/dashboard'));
+app.use('/api/v1/projects', require('./routes/projects'));
 
 app.get('/', (req, res) => {
   console.log("Hello world");

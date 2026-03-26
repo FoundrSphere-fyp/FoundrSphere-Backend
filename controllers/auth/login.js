@@ -36,6 +36,9 @@ const login = asyncWrapper(async (req, res) => {
             userId: user._id,
             username: user.username,
             email: user.email,
+            fullName: user.fullName,
+            userType: user.userType,
+            isProfileComplete: user.isProfileComplete,
         };
 
         return res.status(200).json({ 

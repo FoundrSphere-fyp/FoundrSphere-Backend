@@ -23,7 +23,18 @@ const getGroupData = asyncWrapper(async (req, res) => {
             const verification = jwt.verify(token, process.env.JWT_SECRET_KEY);
             
             
-     let posts = await GroupPost.find({groupId: req.body.groupId}).populate("author")
+        let posts = await GroupPost.find({groupId: req.body.groupId})
+         .populate("author")
+         .populate("comments.user", "fullName username userType")
+         .lean();
+
+        posts = posts.map((post) => ({
+            ...post,
+            likes: Array.isArray(post.likes) ? post.likes : [],
+            comments: Array.isArray(post.comments) ? post.comments : [],
+            likesCount: Array.isArray(post.likes) ? post.likes.length : 0,
+            commentsCount: Array.isArray(post.comments) ? post.comments.length : 0,
+        }));
 
      return res.status(200).json({ 
             type: "success", 
