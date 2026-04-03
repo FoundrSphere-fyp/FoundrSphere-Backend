@@ -1,9 +1,22 @@
+const jwt = require("jsonwebtoken");
 const asyncWrapper = require("../../middleware/async");
 const Project = require("../../models/Project");
 const Investment = require("../../models/Investment");
 
+function getOptionalViewerId(req) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return null;
+  try {
+    const verification = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    return verification.userId;
+  } catch {
+    return null;
+  }
+}
+
 const getProjectById = asyncWrapper(async (req, res) => {
   const { id } = req.params;
+  const viewerId = getOptionalViewerId(req);
 
   const project = await Project.findById(id)
     .select("-embedding")
@@ -13,7 +26,10 @@ const getProjectById = asyncWrapper(async (req, res) => {
     return res.status(404).json({ type: "error", message: "Project not found." });
   }
 
-  if (project.visibility !== "public") {
+  const ownerIdStr = String(project.ownerId?._id ?? project.ownerId);
+  const isOwner = viewerId && String(viewerId) === ownerIdStr;
+
+  if (project.visibility !== "public" && !isOwner) {
     return res.status(404).json({ type: "error", message: "Project not found." });
   }
 
@@ -40,8 +56,6 @@ const getProjectById = asyncWrapper(async (req, res) => {
     convictionLevel: inv.convictionLevel,
     createdAt: inv.createdAt,
   }));
-  console.log(investments);
-  console.log(project);
 
   return res.status(200).json({
     type: "success",

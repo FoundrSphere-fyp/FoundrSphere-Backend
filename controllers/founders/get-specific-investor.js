@@ -1,6 +1,7 @@
 const User = require("../../models/User");
 const asyncWrapper = require("../../middleware/async");
 const Investment = require("../../models/Investment");
+const InvestorProfile = require("../../models/InvestorProfile");
 
 const getSpecificInvestor = asyncWrapper(async (req, res) => {
   try {
@@ -12,11 +13,21 @@ const getSpecificInvestor = asyncWrapper(async (req, res) => {
       });
     }
 
+    const investorProfile = await InvestorProfile.findOne({ userId: investor._id })
+      .select("-embedding")
+      .lean();
+
     const investments = await Investment.find({
       investorId: investor._id,
       visibility: { $in: ["public", "amount_hidden"] },
     })
-      .populate("projectId")
+      .populate({
+        path: "projectId",
+        populate: {
+          path: "ownerId",
+          select: "fullName username email userType",
+        },
+      })
       .sort({ createdAt: -1 });
 
     const uniqueProjectsMap = new Map();
@@ -29,7 +40,8 @@ const getSpecificInvestor = asyncWrapper(async (req, res) => {
 
     return res.status(200).json({
       type: "success",
-      investor: investor,
+      investor,
+      investorProfile,
       investments,
       projects: investedProjects,
     });

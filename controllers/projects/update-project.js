@@ -1,5 +1,6 @@
 const asyncWrapper = require("../../middleware/async");
 const Project = require("../../models/Project");
+const { trySaveProjectEmbedding } = require("../../services/persistEmbeddings");
 
 const toArray = (value) => {
   if (!value) return [];
@@ -59,6 +60,8 @@ const updateProject = asyncWrapper(async (req, res) => {
   if (demo !== undefined) project.links.demo = demo ? String(demo).trim() : "";
 
   await project.save();
+
+  await trySaveProjectEmbedding(project._id);
 
   return res.status(200).json({
     type: "success",

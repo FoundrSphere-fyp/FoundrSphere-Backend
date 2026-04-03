@@ -502,6 +502,7 @@ app.use('/api/v1/chatbot', require('./routes/chatbot'));
 app.use('/api/v1/posts', require('./routes/posts'));
 app.use('/api/v1/dashboard', require('./routes/dashboard'));
 app.use('/api/v1/projects', require('./routes/projects'));
+app.use('/api/v1/embeddings', require('./routes/embeddings'));
 
 app.get('/', (req, res) => {
   console.log("Hello world");

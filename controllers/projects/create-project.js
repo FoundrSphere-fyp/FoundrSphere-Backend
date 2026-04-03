@@ -1,6 +1,7 @@
 const asyncWrapper = require("../../middleware/async");
 const Project = require("../../models/Project");
 const User = require("../../models/User");
+const { trySaveProjectEmbedding } = require("../../services/persistEmbeddings");
 
 const toArray = (value) => {
   if (!value) return [];
@@ -63,6 +64,8 @@ const createProject = asyncWrapper(async (req, res) => {
     },
     visibility: visibility === "private" ? "private" : "public",
   });
+
+  await trySaveProjectEmbedding(project._id);
 
   return res.status(201).json({
     type: "success",

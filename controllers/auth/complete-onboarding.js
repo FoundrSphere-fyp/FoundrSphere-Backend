@@ -2,6 +2,7 @@ const asyncWrapper = require("../../middleware/async");
 const User = require("../../models/User");
 const FounderProfile = require("../../models/FounderProfile");
 const InvestorProfile = require("../../models/InvestorProfile");
+const { trySaveFounderEmbedding, trySaveInvestorEmbedding } = require("../../services/persistEmbeddings");
 
 const toArray = (value) => {
   if (!value) return [];
@@ -63,6 +64,7 @@ const completeOnboarding = asyncWrapper(async (req, res) => {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+    await trySaveFounderEmbedding(user._id);
   } else if (user.userType === "investor") {
     const {
       firmName,
@@ -97,6 +99,7 @@ const completeOnboarding = asyncWrapper(async (req, res) => {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+    await trySaveInvestorEmbedding(user._id);
   } else {
     return res.status(400).json({
       type: "error",

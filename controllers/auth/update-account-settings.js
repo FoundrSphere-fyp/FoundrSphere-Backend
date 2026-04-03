@@ -2,6 +2,7 @@ const asyncWrapper = require("../../middleware/async");
 const User = require("../../models/User");
 const FounderProfile = require("../../models/FounderProfile");
 const InvestorProfile = require("../../models/InvestorProfile");
+const { trySaveFounderEmbedding, trySaveInvestorEmbedding } = require("../../services/persistEmbeddings");
 
 const toArray = (value) => {
   if (!value) return [];
@@ -96,6 +97,7 @@ const updateAccountSettings = asyncWrapper(async (req, res) => {
       founderUpdate,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).select("-embedding -__v");
+    await trySaveFounderEmbedding(user._id);
   } else if (user.userType === "investor") {
     updatedProfile = await InvestorProfile.findOneAndUpdate(
       { userId: user._id },
@@ -112,6 +114,7 @@ const updateAccountSettings = asyncWrapper(async (req, res) => {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).select("-embedding -__v");
+    await trySaveInvestorEmbedding(user._id);
   }
 
   return res.status(200).json({
