@@ -26,6 +26,7 @@ const getGroupData = asyncWrapper(async (req, res) => {
         let posts = await GroupPost.find({groupId: req.body.groupId})
          .populate("author")
          .populate("comments.user", "fullName username userType")
+         .populate("eventId")
          .lean();
 
         posts = posts.map((post) => ({

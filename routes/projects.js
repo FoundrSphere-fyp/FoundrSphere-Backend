@@ -10,6 +10,7 @@ const getProjectsByOwner = require("../controllers/projects/get-projects-by-owne
 const getInvestmentsByInvestor = require("../controllers/projects/get-investments-by-investor");
 const getProjectById = require("../controllers/projects/get-project-by-id");
 const createInvestment = require("../controllers/projects/create-investment");
+const getPublicProjects = require("../controllers/projects/get-public-projects");
 
 router.route("/my").get(authMiddleware, getMyProjects);
 router.route("/create").post(authMiddleware, createProject);
@@ -19,6 +20,7 @@ router.route("/delete/:id").delete(authMiddleware, deleteProject);
 
 router.route("/owner/:userId").get(getProjectsByOwner);
 router.route("/investor/:investorId/investments").get(getInvestmentsByInvestor);
+router.route("/public").get(getPublicProjects);
 
 router.route("/:id").get(getProjectById);
 

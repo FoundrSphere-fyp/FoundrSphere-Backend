@@ -35,6 +35,11 @@ const completeOnboarding = asyncWrapper(async (req, res) => {
       fundingNeeded,
       location,
       businessModel,
+      founderRole,
+      commitmentLevel,
+      desiredCofounderRoles,
+      desiredCommitmentLevel,
+      cofounderPreferenceText,
       tractionUsers,
       tractionRevenue,
     } = req.body;
@@ -57,6 +62,15 @@ const completeOnboarding = asyncWrapper(async (req, res) => {
         fundingNeeded: toNumber(fundingNeeded),
         location: location ? String(location).trim() : undefined,
         businessModel: businessModel ? String(businessModel).trim() : undefined,
+        founderRole: founderRole ? String(founderRole).trim() : undefined,
+        commitmentLevel: commitmentLevel ? String(commitmentLevel).trim() : undefined,
+        desiredCofounderRoles: toArray(desiredCofounderRoles),
+        desiredCommitmentLevel: desiredCommitmentLevel
+          ? String(desiredCommitmentLevel).trim()
+          : undefined,
+        cofounderPreferenceText: cofounderPreferenceText
+          ? String(cofounderPreferenceText).trim()
+          : undefined,
         traction: {
           users: toNumber(tractionUsers),
           revenue: toNumber(tractionRevenue),

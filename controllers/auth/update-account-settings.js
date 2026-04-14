@@ -83,6 +83,18 @@ const updateAccountSettings = asyncWrapper(async (req, res) => {
       fundingNeeded: toNumber(profile.fundingNeeded),
       location: profile.location ? String(profile.location).trim() : undefined,
       businessModel: profile.businessModel ? String(profile.businessModel).trim() : undefined,
+      founderRole: profile.founderRole ? String(profile.founderRole).trim() : undefined,
+      commitmentLevel: profile.commitmentLevel ? String(profile.commitmentLevel).trim() : undefined,
+      desiredCofounderRoles:
+        profile.desiredCofounderRoles !== undefined
+          ? toArray(profile.desiredCofounderRoles)
+          : undefined,
+      desiredCommitmentLevel: profile.desiredCommitmentLevel
+        ? String(profile.desiredCommitmentLevel).trim()
+        : undefined,
+      cofounderPreferenceText: profile.cofounderPreferenceText
+        ? String(profile.cofounderPreferenceText).trim()
+        : undefined,
     };
 
     const traction = {};

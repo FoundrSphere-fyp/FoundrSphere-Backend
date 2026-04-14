@@ -23,7 +23,9 @@ const getSingleGroup = asyncWrapper(async (req, res) => {
             const verification = jwt.verify(token, process.env.JWT_SECRET_KEY);
             
             
-     let post = await GroupPost.findOne({_id: req.body.postId}).populate("author")
+     let post = await GroupPost.findOne({_id: req.body.postId})
+       .populate("author")
+       .populate("eventId")
 
      return res.status(200).json({ 
             type: "success", 

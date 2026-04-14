@@ -56,7 +56,12 @@ const groupPostSchema = new Schema({
       type: Date,
       default: Date.now,
     }
-  }]
+  }],
+  eventId: {
+    type: Schema.Types.ObjectId,
+    ref: 'GroupEvent',
+    default: null,
+  },
 }, { timestamps: true });
 
 

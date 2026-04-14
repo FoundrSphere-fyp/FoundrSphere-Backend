@@ -12,6 +12,14 @@ function buildFounderEmbeddingText(profile) {
     p.stage && `Stage: ${p.stage}`,
     p.location && `Location: ${p.location}`,
     p.businessModel && `Business model: ${p.businessModel}`,
+    p.founderRole && `Founder role: ${p.founderRole}`,
+    p.commitmentLevel && `Commitment level: ${p.commitmentLevel}`,
+    Array.isArray(p.desiredCofounderRoles) &&
+      p.desiredCofounderRoles.length &&
+      `Desired cofounder roles: ${p.desiredCofounderRoles.join(", ")}`,
+    p.desiredCommitmentLevel &&
+      `Desired cofounder commitment: ${p.desiredCommitmentLevel}`,
+    p.cofounderPreferenceText && `Cofounder preference: ${p.cofounderPreferenceText}`,
     p.fundingNeeded != null && p.fundingNeeded !== "" && `Funding needed: ${p.fundingNeeded}`,
     p.traction &&
       (p.traction.users != null || p.traction.revenue != null) &&

@@ -17,6 +17,13 @@ const founderProfileSchema = new Schema({
     location: String,
   
     businessModel: String,
+
+    founderRole: String,
+    commitmentLevel: String,
+    desiredCofounderRoles: [String],
+    desiredCommitmentLevel: String,
+
+    cofounderPreferenceText: String,
   
     traction: {
       users: Number,
