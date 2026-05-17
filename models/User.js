@@ -51,6 +51,11 @@ const users = new Schema({
     default: false
   },
 
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+
   embedding: {
     type: [Number]
   },

@@ -481,18 +481,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Database connection middleware - ensures DB is connected before any route
-app.use(async (req, res, next) => {
-  try {
-    await connectDB(process.env.MONGO_URI);
-    next();
-  } catch (error) {
-    console.error('Database connection error:', error);
-    return res.status(500).json({
-      type: "error",
-      message: "Database connection failed"
-    });
-  }
-});
+// app.use(async (req, res, next) => {
+//   try {
+//     await connectDB(process.env.MONGO_URI);
+//     next();
+//   } catch (error) {
+//     console.error('Database connection error:', error);
+//     return res.status(500).json({
+//       type: "error",
+//       message: "Database connection failed"
+//     });
+//   }
+// });
 
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/groups', require('./routes/groups'));
@@ -503,6 +503,7 @@ app.use('/api/v1/posts', require('./routes/posts'));
 app.use('/api/v1/dashboard', require('./routes/dashboard'));
 app.use('/api/v1/projects', require('./routes/projects'));
 app.use('/api/v1/embeddings', require('./routes/embeddings'));
+app.use('/api/v1/admin', require('./routes/admin'));
 
 app.get('/', (req, res) => {
   console.log("Hello world");

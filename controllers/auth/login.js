@@ -21,6 +21,13 @@ const login = asyncWrapper(async (req, res) => {
             field: "username" 
         });
     }
+
+    if (user.isActive === false) {
+        return res.status(403).json({
+            message: "Your account has been disabled. Contact support.",
+            type: "error",
+        });
+    }
     
     if (user && (await bcrypt.compare(rPassword, user.password))) {
         // Generate JWT token with expiration
@@ -39,6 +46,7 @@ const login = asyncWrapper(async (req, res) => {
             fullName: user.fullName,
             userType: user.userType,
             isProfileComplete: user.isProfileComplete,
+            isActive: user.isActive !== false,
         };
 
         return res.status(200).json({ 
