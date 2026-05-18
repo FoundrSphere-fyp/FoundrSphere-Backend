@@ -453,7 +453,9 @@ app.use((req, res, next) => {
     'http://localhost:3000',
     'http://localhost:3001',
     'https://localhost:3000',
-    'https://localhost:3001'
+    'https://localhost:3001',
+    'https://foundrsphere.vercel.app',
+    'https://api.foundrsphere.com'
   ];
 
   const origin = req.headers.origin;
