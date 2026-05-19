@@ -1,4 +1,5 @@
 const ChatbotConversation = require('../../models/ChatbotConversation');
+const { computeContextForMessages } = require('../../services/contextWindow');
 
 const getChatbotConversation = async (req, res) => {
   try {
@@ -19,7 +20,8 @@ const getChatbotConversation = async (req, res) => {
 
     res.json({
       type: 'success',
-      conversation
+      conversation,
+      contextWindow: computeContextForMessages(conversation.messages || []),
     });
   } catch (error) {
     console.error('Error getting chatbot conversation:', error);

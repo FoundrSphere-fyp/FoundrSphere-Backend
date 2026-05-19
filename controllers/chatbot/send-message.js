@@ -1,5 +1,6 @@
 const ChatbotConversation = require("../../models/ChatbotConversation");
 const { generateChatReply } = require("../../services/hfChat");
+const { computeContextForMessages } = require("../../services/contextWindow");
 
 const sendChatbotMessage = async (req, res) => {
   try {
@@ -37,8 +38,11 @@ const sendChatbotMessage = async (req, res) => {
     }
 
     let aiResponse = "";
+    let contextWindow = null;
     try {
-      aiResponse = await generateChatReply(conversation.messages);
+      const result = await generateChatReply(conversation.messages);
+      aiResponse = result.reply;
+      contextWindow = result.contextWindow;
       if (!aiResponse) {
         aiResponse = "Sorry, I could not generate a response.";
       }
@@ -61,9 +65,14 @@ const sendChatbotMessage = async (req, res) => {
     conversation.lastMessageAt = new Date();
     await conversation.save();
 
+    const updatedContext =
+      contextWindow ||
+      computeContextForMessages(conversation.messages);
+
     res.json({
       type: "success",
       message: assistantMessage,
+      contextWindow: updatedContext,
     });
   } catch (error) {
     console.error("Error sending chatbot message:", error);
