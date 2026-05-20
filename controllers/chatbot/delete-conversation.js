@@ -1,4 +1,5 @@
 const ChatbotConversation = require('../../models/ChatbotConversation');
+const { deleteConversationMemory } = require('../../services/chatMemory');
 
 const deleteChatbotConversation = async (req, res) => {
   try {
@@ -16,6 +17,8 @@ const deleteChatbotConversation = async (req, res) => {
         message: 'Conversation not found'
       });
     }
+
+    await deleteConversationMemory(userId, conversationId);
 
     res.json({
       type: 'success',

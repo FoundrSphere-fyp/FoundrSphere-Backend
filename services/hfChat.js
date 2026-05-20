@@ -25,16 +25,19 @@ function getHfChatClient() {
 
 /**
  * @param {Array<{ role: string, content: string }>} conversationMessages
+ * @param {{ memoryContext?: string }} [options]
  * @returns {Promise<{ reply: string, contextWindow: object }>}
  */
-async function generateChatReply(conversationMessages) {
+async function generateChatReply(conversationMessages, options = {}) {
   const openai = getHfChatClient();
   const model = (process.env.HF_CHAT_MODEL || DEFAULT_MODEL).trim();
   const max_tokens =
     parseInt(process.env.HF_CHAT_MAX_TOKENS || String(DEFAULT_MAX_TOKENS), 10) ||
     DEFAULT_MAX_TOKENS;
 
-  const llamaMessage = buildLlamaChatMessage(conversationMessages);
+  const llamaMessage = buildLlamaChatMessage(conversationMessages, {
+    memoryContext: options.memoryContext,
+  });
 
   const completion = await openai.chat.completions.create({
     model,

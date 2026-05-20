@@ -35,8 +35,9 @@ function roleHeader(role) {
 /**
  * Build a single user message in Llama 3 chat format (system + history + assistant header).
  * @param {Array<{ role: string, content: string }>} conversationMessages
+ * @param {{ memoryContext?: string }} [options]
  */
-function buildLlamaChatMessage(conversationMessages) {
+function buildLlamaChatMessage(conversationMessages, options = {}) {
   const limit = Math.max(
     2,
     parseInt(process.env.HF_CHAT_HISTORY_LIMIT || String(DEFAULT_HISTORY_LIMIT), 10) ||
@@ -51,7 +52,12 @@ function buildLlamaChatMessage(conversationMessages) {
       content: String(m.content).trim(),
     }));
 
-  let content = `${LLAMA.begin}\n${roleHeader("system")}${getSystemPrompt()}${LLAMA.eot}`;
+  const memoryBlock = String(options.memoryContext || "").trim();
+  const systemBody = memoryBlock
+    ? `${getSystemPrompt()}\n\n${memoryBlock}`
+    : getSystemPrompt();
+
+  let content = `${LLAMA.begin}\n${roleHeader("system")}${systemBody}${LLAMA.eot}`;
 
   for (const msg of history) {
     content += `${roleHeader(msg.role)}${msg.content}${LLAMA.eot}`;

@@ -8,6 +8,7 @@ const investmentSchema = new Schema({
       required: true,
       index: true
     },
+    
   
     projectId: {
       type: Schema.Types.ObjectId,

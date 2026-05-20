@@ -1,11 +1,16 @@
 const ChatbotConversation = require("../../models/ChatbotConversation");
 const { generateChatReply } = require("../../services/hfChat");
 const { computeContextForMessages } = require("../../services/contextWindow");
+const {
+  queryRelevantMemory,
+  storeMessageMemory,
+  isMemoryEnabled,
+} = require("../../services/chatMemory");
 
 const sendChatbotMessage = async (req, res) => {
   try {
     const userId = req.userId;
-    const { conversationId, message } = req.body;
+    const { conversationId, message, memoryScope = "conversation" } = req.body;
 
     if (!message || !conversationId) {
       return res.status(400).json({
@@ -13,6 +18,9 @@ const sendChatbotMessage = async (req, res) => {
         message: "Conversation ID and message are required",
       });
     }
+
+    const scope =
+      memoryScope === "all" ? "all" : "conversation";
 
     const conversation = await ChatbotConversation.findOne({
       _id: conversationId,
@@ -32,15 +40,33 @@ const sendChatbotMessage = async (req, res) => {
       timestamp: new Date(),
     });
 
+    const userMessageIndex = conversation.messages.length - 1;
+
     if (conversation.messages.length === 1) {
       conversation.title =
         message.substring(0, 50) + (message.length > 50 ? "..." : "");
     }
 
+    let memoryHits = 0;
+    let memoryContext = "";
+
+    if (isMemoryEnabled()) {
+      const memory = await queryRelevantMemory({
+        userId,
+        conversationId,
+        queryText: message,
+        memoryScope: scope,
+      });
+      memoryContext = memory.memoryContext;
+      memoryHits = memory.hits;
+    }
+
     let aiResponse = "";
     let contextWindow = null;
     try {
-      const result = await generateChatReply(conversation.messages);
+      const result = await generateChatReply(conversation.messages, {
+        memoryContext,
+      });
       aiResponse = result.reply;
       contextWindow = result.contextWindow;
       if (!aiResponse) {
@@ -62,8 +88,30 @@ const sendChatbotMessage = async (req, res) => {
     };
 
     conversation.messages.push(assistantMessage);
+    const assistantMessageIndex = conversation.messages.length - 1;
     conversation.lastMessageAt = new Date();
     await conversation.save();
+
+    if (isMemoryEnabled()) {
+      await Promise.all([
+        storeMessageMemory({
+          userId,
+          conversationId,
+          conversationTitle: conversation.title,
+          messageIndex: userMessageIndex,
+          role: "user",
+          content: message,
+        }),
+        storeMessageMemory({
+          userId,
+          conversationId,
+          conversationTitle: conversation.title,
+          messageIndex: assistantMessageIndex,
+          role: "assistant",
+          content: aiResponse,
+        }),
+      ]);
+    }
 
     const updatedContext =
       contextWindow ||
@@ -73,6 +121,11 @@ const sendChatbotMessage = async (req, res) => {
       type: "success",
       message: assistantMessage,
       contextWindow: updatedContext,
+      memory: {
+        enabled: isMemoryEnabled(),
+        scope,
+        hits: memoryHits,
+      },
     });
   } catch (error) {
     console.error("Error sending chatbot message:", error);

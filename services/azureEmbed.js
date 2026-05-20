@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { AzureOpenAI } = require("openai");
 
 const MAX_CHARS = 30000;
@@ -72,6 +73,81 @@ async function embedWithLocalModel(text) {
   }
 }
 
+/**
+ * HF Inference Endpoint returns e.g. [[0.01, -0.02, ...]] for one string.
+ * @param {unknown} data
+ * @returns {number[]|null}
+ */
+function parseHfEmbeddingResponse(data) {
+  if (!data) return null;
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) return null;
+    if (typeof data[0] === "number") return data;
+    if (Array.isArray(data[0])) return data[0];
+  }
+
+  if (Array.isArray(data?.embeddings)) {
+    return parseHfEmbeddingResponse(data.embeddings);
+  }
+
+  if (Array.isArray(data?.data) && data.data[0]?.embedding) {
+    return data.data[0].embedding;
+  }
+
+  return null;
+}
+
+async function embedWithHf(text) {
+  const url = String(
+    process.env.HF_EMBED_URL ||
+      "https://ekgrbh8j8gghyept.eu-west-1.aws.endpoints.huggingface.cloud"
+  ).trim();
+  const apiKey = String(process.env.HF_TOKEN || "").trim();
+
+  if (!url || !apiKey) {
+    console.warn("[embeddings] HF_EMBED_URL or HF_TOKEN missing; skipping HF embedding.");
+    return null;
+  }
+
+  try {
+    const parameters = {};
+    const rawParams = String(process.env.HF_EMBED_PARAMETERS || "").trim();
+    if (rawParams) {
+      try {
+        Object.assign(parameters, JSON.parse(rawParams));
+      } catch (_err) {
+        console.warn("[embeddings] HF_EMBED_PARAMETERS is not valid JSON; using {}.");
+      }
+    }
+
+    const response = await axios.post(
+      url,
+      { inputs: text, parameters },
+      {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 60000,
+      }
+    );
+
+    const vector = parseHfEmbeddingResponse(response.data);
+    if (!Array.isArray(vector) || vector.length === 0) {
+      console.warn("[embeddings] HF endpoint returned empty or unrecognized shape.");
+      return null;
+    }
+
+    return vector;
+  } catch (err) {
+    const detail = err.response?.data || err.message;
+    console.error("[embeddings] HF embedding failed:", detail);
+    return null;
+  }
+}
+
 async function embedWithAzure(text) {
   const azure = normalizeAzureConfig();
   if (!azure) {
@@ -121,7 +197,11 @@ async function embedText(text) {
     return embedWithLocalModel(trimmed);
   }
 
+  if (provider === "hf" || provider === "huggingface") {
+    return embedWithHf(trimmed);
+  }
+
   return embedWithAzure(trimmed);
 }
 
-module.exports = { embedText };
+module.exports = { embedText, getEmbeddingProvider };
